@@ -1,10 +1,16 @@
 // QuestionFlipCards.tsx
 
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import FlipCard from "@/components/FlipCard";
 import { questions } from "@/assets/QuestionsData";
-import { Ionicons } from "@expo/vector-icons"; // Import the icon library
+import { Ionicons } from "@expo/vector-icons";
 
 const QuestionFlipCards: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -36,53 +42,59 @@ const QuestionFlipCards: React.FC = () => {
   const currentQuestion = shuffledQuestions[currentIndex];
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.counterText}>
-        Question {currentIndex + 1} of {shuffledQuestions.length}
-      </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.counterText}>
+          Question {currentIndex + 1} of {shuffledQuestions.length}
+        </Text>
 
-      <View style={styles.cardWrapper}>
-        <FlipCard
-          frontText={currentQuestion.question}
-          backText={currentQuestion.answer}
-        />
+        <View style={styles.cardWrapper}>
+          <FlipCard
+            frontText={currentQuestion.question}
+            backText={currentQuestion.answer}
+          />
+        </View>
+
+        <View style={styles.navigation}>
+          <TouchableOpacity
+            onPress={handlePrevious}
+            disabled={currentIndex === 0}
+            style={[
+              styles.navButton,
+              currentIndex === 0 && styles.navButtonDisabled,
+            ]}
+          >
+            <Ionicons name="arrow-back" size={32} color="#4f4f4f" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleShuffle} style={styles.navButton}>
+            <Ionicons name="shuffle-outline" size={32} color="#4f4f4f" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleNext}
+            disabled={currentIndex === shuffledQuestions.length - 1}
+            style={[
+              styles.navButton,
+              currentIndex === shuffledQuestions.length - 1 &&
+                styles.navButtonDisabled,
+            ]}
+          >
+            <Ionicons name="arrow-forward" size={32} color="#4f4f4f" />
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <View style={styles.navigation}>
-        <TouchableOpacity
-          onPress={handlePrevious}
-          disabled={currentIndex === 0}
-          style={[
-            styles.navButton,
-            currentIndex === 0 && styles.navButtonDisabled,
-          ]}
-        >
-          <Ionicons name="arrow-back" size={32} color="#4f4f4f" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleShuffle} style={[styles.navButton]}>
-          <Ionicons name="shuffle-outline" size={32} color="#4f4f4f" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleNext}
-          disabled={currentIndex === shuffledQuestions.length - 1}
-          style={[
-            styles.navButton,
-            currentIndex === shuffledQuestions.length - 1 &&
-              styles.navButtonDisabled,
-          ]}
-        >
-          <Ionicons name="arrow-forward" size={32} color="#4f4f4f" />
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default QuestionFlipCards;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff", // Optional: Set background color for the safe area
+  },
   container: {
     flex: 1,
     padding: 16,
