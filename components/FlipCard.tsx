@@ -15,24 +15,64 @@ interface FlipCardProps {
   frontText: string;
   backText: string;
   style?: StyleProp<ViewStyle>;
+  autoFlipTrigger: boolean; // Prop to trigger auto flip
+  onFlipComplete?: () => void; // Add this line
 }
 
-const FlipCard: React.FC<FlipCardProps> = ({ frontText, backText, style }) => {
+const FlipCard: React.FC<FlipCardProps> = ({
+  frontText,
+  backText,
+  style,
+  autoFlipTrigger,
+  onFlipComplete,
+}) => {
   const animate = useRef(new Animated.Value(0)).current;
   const [isFlipped, setIsFlipped] = useState(false);
+  const flipLock = useRef(false); // Ref to prevent double flips
 
   // Reset the flip state when frontText changes
   useEffect(() => {
     animate.setValue(0);
     setIsFlipped(false);
+    flipLock.current = false; // Reset flip lock when changing content
   }, [frontText]);
 
-  const handleFlip = () => {
+  // Flip the card automatically when the trigger changes
+  useEffect(() => {
+    if (!flipLock.current) {
+      handleAutoFlip();
+    }
+  }, [autoFlipTrigger]);
+
+  const handleAutoFlip = () => {
+    if (flipLock.current) return; // Prevent multiple flips
+    flipLock.current = true; // Lock flipping
+
     Animated.timing(animate, {
       toValue: isFlipped ? 0 : 180,
       duration: 800,
       useNativeDriver: true,
-    }).start(() => setIsFlipped(!isFlipped));
+    }).start(() => {
+      setIsFlipped((prev) => !prev);
+      flipLock.current = false; // Unlock flipping after the animation completes
+      if (onFlipComplete) {
+        onFlipComplete();
+      }
+    });
+  };
+
+  const handleFlip = () => {
+    if (flipLock.current) return; // Prevent multiple manual flips
+    flipLock.current = true; // Lock flipping
+
+    Animated.timing(animate, {
+      toValue: isFlipped ? 0 : 180,
+      duration: 800,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsFlipped((prev) => !prev);
+      flipLock.current = false; // Unlock flipping after the animation completes
+    });
   };
 
   const frontInterpolate = animate.interpolate({
